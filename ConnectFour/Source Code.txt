@@ -1,0 +1,424 @@
+separatorMenuItem1Main:
+
+package com.Internshala.connectfour;
+
+import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Scene;
+import javafx.scene.control.*;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Pane;
+import javafx.stage.Stage;
+
+public class Main extends Application {
+
+	private Controller controller;
+
+    @Override
+    public void start(Stage primaryStage) throws Exception{
+
+        FXMLLoader loader =new FXMLLoader(getClass().getResource("game.fxml"));
+        GridPane rootGridPane=loader.load();
+        controller= loader.getController();
+        controller.createPlayground();
+
+        Pane menuPane=(Pane) rootGridPane.getChildren().get(0);
+
+        Scene scene = new Scene(rootGridPane);
+
+        MenuBar menuBar = CreateMenu();
+        menuPane.getChildren().add(menuBar);
+        menuBar.prefWidthProperty().bind(primaryStage.widthProperty());
+
+        primaryStage.setScene(scene);
+        primaryStage.setTitle("Connect4");
+        primaryStage.setResizable(false);
+        primaryStage.show();
+
+    }
+
+    private MenuBar CreateMenu() {
+        Menu newFileItem=new Menu("File");
+        MenuItem newGame=new MenuItem("New Game");
+        newGame.setOnAction(event -> controller.resetGame());
+        MenuItem resetGame=new MenuItem("Reset Game");
+        resetGame.setOnAction(event -> controller.resetGame());
+        SeparatorMenuItem separatorMenuItem=new SeparatorMenuItem();
+        MenuItem exitGame=new MenuItem("Exit Game");
+        exitGame.setOnAction(event -> exitgame());
+        newFileItem.getItems().addAll(newGame,resetGame,separatorMenuItem,exitGame);
+
+        Menu helpItem=new Menu("Help");
+        MenuItem aboutGame= new MenuItem("About Connect4");
+        aboutGame.setOnAction(event -> aboutgame());
+        SeparatorMenuItem separatorMenuItem1=new SeparatorMenuItem();
+        MenuItem aboutMe = new MenuItem("About Me");
+        aboutMe.setOnAction(event -> aboutme());
+
+        helpItem.getItems().addAll(aboutGame,separatorMenuItem1,aboutMe);
+
+        MenuBar menuBar=new MenuBar();
+        menuBar.getMenus().addAll(newFileItem,helpItem);
+
+        return menuBar;
+    }
+
+    private void exitgame() {
+        Platform.exit();
+        System.exit(0);
+    }
+
+    private void aboutme() {
+        Alert alert =new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("About Me");
+        alert.setHeaderText("Putrevu Lakshmi Gana Ravi Chandra Phani");
+        alert.setContentText("I'm an Electrified Electronics Engineer,\nBtech 3rd year,\nThis is my second application in Java and My first Gaming application in Java,\ni will develop and create more applications soon,\nTHANK YOU,\nStay Home...Stay Safe....");
+        alert.show();
+    }
+
+    private void aboutgame() {
+        Alert alert=new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("About Connect4");
+        alert.setHeaderText("How to Play ?");
+        alert.setContentText("Connect Four is a two-player connection game in which the players first choose a color and then take turns dropping colored discs from the top into a seven-column, six-row vertically suspended grid. The pieces fall straight down, occupying the next available space within the column. The objective of the game is to be the first to form a horizontal, vertical, or diagonal line of four of one's own discs. Connect Four is a solved game. The first player can always win by playing the right moves.");
+        alert.show();
+    }
+
+
+    public static void main(String[] args) {
+        launch(args);
+    }
+}
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+FXML :
+
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<GridPane fx:id="rootGridPane" style="-fx-background-color: #d9f7f0;" xmlns="http://javafx.com/javafx/10.0.2-internal" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.Internshala.connectfour.Controller">
+    <columnConstraints>
+        <ColumnConstraints />
+        <ColumnConstraints maxWidth="298.0" minWidth="225.0" prefWidth="225.0" />
+    </columnConstraints>
+    <rowConstraints>
+        <RowConstraints minHeight="10.0" prefHeight="30.0" />
+        <RowConstraints />
+    </rowConstraints>
+    <children>
+        <Pane fx:id="myMenuPane" GridPane.columnSpan="2" />
+        <Pane fx:id="insertedDiscPane" prefHeight="400.0" prefWidth="200.0" GridPane.rowIndex="1" />
+        <VBox fx:id="myVbox" style="-fx-background-color: #2b3b4c;" GridPane.columnIndex="1" GridPane.rowIndex="1">
+         <children>
+            <TextField fx:id="playerOneName" prefHeight="25.0" prefWidth="293.0" promptText="Player One Name">
+               <VBox.margin>
+                  <Insets left="15.0" right="15.0" top="35.0" />
+               </VBox.margin></TextField>
+            <TextField fx:id="playerTwoName" prefHeight="25.0" prefWidth="270.0" promptText="Player Two Name">
+               <VBox.margin>
+                  <Insets left="15.0" right="15.0" />
+               </VBox.margin></TextField>
+            <Button fx:id="setNamesButton" mnemonicParsing="false" prefHeight="25.0" prefWidth="310.0" text="Set Names">
+               <VBox.margin>
+                  <Insets bottom="5.0" left="15.0" right="15.0" top="5.0" />
+               </VBox.margin></Button>
+            <Label fx:id="playerNameLabel" alignment="CENTER" prefHeight="40.0" prefWidth="300.0" text="Player One" textFill="#f5f2f2">
+               <font>
+                  <Font name="System Bold" size="28.0" />
+               </font>
+               <VBox.margin>
+                  <Insets top="70.0" />
+               </VBox.margin>
+            </Label>
+            <Label alignment="CENTER" prefHeight="39.0" prefWidth="313.0" text="Turn" textFill="#f8f0f0">
+               <font>
+                  <Font size="27.0" />
+               </font>
+            </Label>
+            <Region prefHeight="200.0" prefWidth="200.0" />
+         </children></VBox>
+    </children>
+</GridPane>
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Controller :
+
+package com.Internshala.connectfour;
+
+
+import javafx.animation.TranslateTransition;
+import javafx.application.Platform;
+import javafx.fxml.FXML;
+import javafx.fxml.Initializable;
+import javafx.geometry.Point2D;
+import javafx.scene.control.*;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Circle;
+import javafx.scene.shape.Rectangle;
+import javafx.scene.shape.Shape;
+import javafx.util.Duration;
+
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.ResourceBundle;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
+public class Controller implements Initializable {
+
+	@FXML
+	public GridPane rootGridPane;
+	@FXML
+	public  Pane insertedDiscPane;
+	@FXML
+	public  Label playerNameLabel;
+	@FXML
+	public TextField playerOneName;
+	@FXML
+	public TextField playerTwoName;
+	@FXML
+	public Button setNamesButton;
+
+	private static final int COLUMNS=7;
+	private static final int ROWS=6;
+	private static final int CIRCLE_DIAMETER=80;
+	private static final String discColor1="#24303E";
+	private static final String discColor2="#CAA88C";
+	private static String PLAYER_ONE="Player_One";
+	private static String PLAYER_TWO="Player_Two";
+	private boolean isPlayerOneTurn=true;
+	public Disc[][] insertedDiscArray=new Disc[ROWS][COLUMNS];
+	private boolean isAllowedToClick=true;
+	private boolean isSetNamesToClick=true;
+
+
+	public void createPlayground() {
+		setNamesButton.setOnAction(event -> {
+			String Inp1=playerOneName.getText();
+			String Inp2=playerTwoName.getText();
+			if(isSetNamesToClick){
+				isSetNamesToClick=false;
+				PLAYER_ONE=Inp1;
+				PLAYER_TWO=Inp2;
+				playerOneName.cancelEdit();
+				playerTwoName.cancelEdit();
+			}
+			playerNameLabel.setText(isPlayerOneTurn?PLAYER_ONE:PLAYER_TWO);
+		});
+		Shape rectWithHoles=createStructurlGrid();
+		rootGridPane.add(rectWithHoles,0,1);
+		List<Rectangle> rectangleList=createClickableColumns();
+		for (Rectangle rectangle:rectangleList) {
+			rootGridPane.add(rectangle,0,1);
+		}
+
+	}
+
+	public Shape createStructurlGrid(){
+
+		Shape rectWithHoles=new Rectangle((COLUMNS+1)*CIRCLE_DIAMETER,(ROWS+1)*CIRCLE_DIAMETER);
+
+		for (int rows=0;rows<ROWS;rows++)
+		{
+			for (int col=0;col<COLUMNS;col++)
+			{
+				Circle circle=new Circle();
+				circle.setRadius(CIRCLE_DIAMETER / 2);
+				circle.setCenterX(CIRCLE_DIAMETER/ 2);
+				circle.setCenterY(CIRCLE_DIAMETER/ 2);
+				circle.setTranslateX((col*(CIRCLE_DIAMETER+5))+CIRCLE_DIAMETER/4);
+				circle.setTranslateY((rows*(CIRCLE_DIAMETER+5))+CIRCLE_DIAMETER/4);
+				circle.setSmooth(true);
+
+				rectWithHoles=Shape.subtract(rectWithHoles,circle);
+			}
+		}
+		rectWithHoles.setFill(Color.WHITE);
+		return rectWithHoles;
+
+	}
+	private List<Rectangle> createClickableColumns(){
+
+		List<Rectangle> rectangleList=new ArrayList<>();
+		for (int col=0;col<COLUMNS;col++){
+
+			Rectangle rectangle=new Rectangle(CIRCLE_DIAMETER,(ROWS+1)*CIRCLE_DIAMETER);
+			rectangle.setFill(Color.TRANSPARENT);
+			rectangle.setTranslateX((col*(CIRCLE_DIAMETER+5))+(int)(CIRCLE_DIAMETER/4));
+
+			rectangle.setOnMouseEntered(event -> rectangle.setFill(Color.valueOf("#eeeeee26")));
+			rectangle.setOnMouseExited(event -> rectangle.setFill(Color.TRANSPARENT));
+
+			final int Column=col;
+			rectangle.setOnMouseClicked(event -> {
+				if(isAllowedToClick) {
+					isAllowedToClick=false;
+					insertDisc(new Disc(isPlayerOneTurn), Column);
+				}
+			});
+
+			rectangleList.add(rectangle);
+		}
+		return rectangleList;
+	}
+
+	private void insertDisc(Disc disc,int column) {
+		int row=ROWS-1;
+		while(row>=0){
+			if(getDiscIfPresent(row,column)==null){
+				break;
+			}
+			row--;
+		}
+		if (row<0){
+			return;
+		}
+		insertedDiscArray[row][column]=disc;
+		insertedDiscPane.getChildren().add(disc);
+
+		disc.setTranslateX(column*(CIRCLE_DIAMETER+5)+(int)(CIRCLE_DIAMETER / 4));
+
+		TranslateTransition translateTransition=new TranslateTransition(Duration.seconds(0.5),disc);
+		translateTransition.setToY(row*(CIRCLE_DIAMETER+5)+(int)(CIRCLE_DIAMETER/4));
+
+		int finalRow = row;
+		translateTransition.setOnFinished(event -> {
+			isAllowedToClick=true;
+			if(gameEnded(finalRow,column)){
+				gameOver();
+				return;
+			}
+
+			isPlayerOneTurn = ! isPlayerOneTurn;
+			playerNameLabel.setText(isPlayerOneTurn?PLAYER_ONE:PLAYER_TWO);
+
+		});
+
+		translateTransition.play();
+
+	}
+
+	private boolean gameEnded(int rows,int column){
+
+		//Vertical Points
+		List<Point2D>verticalPoints=IntStream.rangeClosed(rows-3 , rows+3).
+				mapToObj(r->new Point2D(r,column)).
+				collect(Collectors.toList());
+		//Horizantal points
+		List<Point2D>horizantalPoints=IntStream.rangeClosed(column-3,column+3).
+				mapToObj(c->new Point2D(rows,c)).
+				collect(Collectors.toList());
+		Point2D startPoint1=new Point2D(rows-3,column+3);
+		//DiagnolPoints-1
+		List<Point2D>diagnolPoint1=IntStream.rangeClosed(0,6)
+				.mapToObj(i->startPoint1.add(i,-i))
+				.collect(Collectors.toList());
+		Point2D startPoint2=new Point2D(rows-3,column-3);
+		//DiagnolPoints-2
+		List<Point2D>diagnalPoint2=IntStream.rangeClosed(0,6)
+				.mapToObj(i->startPoint2.add(i,i))
+				.collect(Collectors.toList());
+
+		boolean isEnded=checkCombinations(verticalPoints)||checkCombinations(horizantalPoints)||checkCombinations(diagnolPoint1)||checkCombinations(diagnalPoint2);
+
+		return isEnded;
+
+
+	}
+
+	private void gameOver() {
+		String winner=isPlayerOneTurn ? PLAYER_ONE : PLAYER_TWO;
+		System.out.println("the winner is "+winner);
+		Alert alert=new Alert(Alert.AlertType.INFORMATION);
+		alert.setTitle("Connect 4");
+		alert.setHeaderText("The Winner is "+winner);
+		alert.setContentText("Want to play again ?");
+
+		ButtonType yesbtn=new ButtonType("Yes");
+		ButtonType nobtn=new ButtonType("No,Exit");
+		alert.getButtonTypes().setAll(yesbtn,nobtn);
+		Platform.runLater(()->{
+			Optional<ButtonType>btnClicked=alert.showAndWait();
+			if(btnClicked.isPresent() && btnClicked.get() == yesbtn){
+				resetGame();
+			}else{
+				Platform.exit();
+				System.exit(0);
+			}
+		});
+
+	}
+
+	public void resetGame() {
+		insertedDiscPane.getChildren().clear();
+		for(int row=0;row< insertedDiscArray.length;row++){
+			for (int col=0;col<insertedDiscArray[row].length;col++){
+				insertedDiscArray[row][col]=null;
+			}
+		}
+		isSetNamesToClick=true;
+		PLAYER_ONE="Player One";
+		PLAYER_TWO="Player Two";
+		playerOneName.clear();
+		playerTwoName.clear();
+		isPlayerOneTurn=true;
+		playerNameLabel.setText(PLAYER_ONE);
+		createPlayground();
+	}
+
+	private boolean checkCombinations(List<Point2D> points) {
+		int chain=0;
+		for (Point2D point:points) {
+			int rowIndexForArray= (int) point.getX();
+			int colIndexForArray = (int) point.getY();
+
+			Disc disc=getDiscIfPresent(rowIndexForArray,colIndexForArray);
+
+			if(disc != null && disc.isPlayerOneMove==isPlayerOneTurn){
+				chain++;
+				if(chain==4){
+					return true;
+				}
+			}else {
+				chain=0;
+			}
+		}
+		return false;
+	}
+	private Disc getDiscIfPresent(int row,int column){
+		if(row>=ROWS||row<0||column>=COLUMNS||column<0){
+			return null;
+		}
+		return insertedDiscArray[row][column];
+	}
+
+	private static class Disc extends Circle{
+
+		private final boolean isPlayerOneMove;
+
+		public Disc(boolean isPlayerOneMove){
+			this.isPlayerOneMove=isPlayerOneMove;
+			setRadius(CIRCLE_DIAMETER/2);
+			setFill(isPlayerOneMove? Color.valueOf(discColor1) : Color.valueOf(discColor2));
+			setCenterX(CIRCLE_DIAMETER/2);
+			setCenterY(CIRCLE_DIAMETER/2);
+		}
+
+	}
+
+
+
+	@Override
+	public void initialize(URL location, ResourceBundle resources) {
+
+
+
+	}
+}
